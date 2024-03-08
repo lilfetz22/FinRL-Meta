@@ -18,7 +18,7 @@ class tgym(gym.Env):
     1. Three action space (0 Buy, 1 Sell, 2 Nothing)
     2. Multiple trading pairs (EURUSD, GBPUSD...) under same time frame
     3. Timeframe from 1 min to daily as long as use candlestick bar (Open, High, Low, Close)
-    4. Use StopLose, ProfitTaken to realize rewards. each pair can configure it own SL and PT in configure file
+    4. Use StopLoss, ProfitTaken to realize rewards. each pair can configure it own SL and PT in configure file
     5. Configure over night cash penalty and each pair's transaction fee and overnight position holding penalty
     6. Split dataset into daily, weekly or monthly..., with fixed time steps, at end of len(df). The business
         logic will force to Close all positions at last Close price (game over).
@@ -56,7 +56,7 @@ class tgym(gym.Env):
     def __init__(
         self,
         df,
-        env_config_file="./neo_finrl/env_fx_trading/config/gdbusd-test-1.json",
+        env_config_file="./config/eurusd.json",
     ) -> None:
         assert df.ndim == 2
         super(tgym, self).__init__()
