@@ -1,0 +1,42 @@
+{
+    "env": {
+        "observation_list": [
+            "Open",
+            "High",
+            "Low",
+            "Close"
+        ],
+        "over_night_cash_penalty": 100,
+        "balance": 200000,
+        "asset_col": "symbol",
+        "time_col": "datetime",
+        "random_start": true,
+        "log_filename": "./data/log/log_",
+        "title":"EURUSD New",
+        "description":"testing with EURUSD begin 8_29_24"
+    },
+    "symbol": {
+        "EURUSD": {
+            "point": 100000,
+            "max_spread": 50,
+            "transaction_fee": 10,
+            "over_night_penalty": 10,
+            "stop_loss_max": 200,
+            "profit_taken_max": 2500,
+            "max_current_holding": 10,
+            "limit_order": false,
+            "limit_order_expiration": 5
+
+        }
+    },
+    "trading_hour":{
+        "Sydney":{"from":0,"to":0},
+        "Tokyo":{"from":0,"to":0},
+        "London":{"from":0,"to":0},
+        "New York":{"from":0,"to":0}
+    },
+    "ploting":{
+        "buy":{"color":"red","shape":""},
+        "sell":{"color":"green","shape":""}
+    }
+}
