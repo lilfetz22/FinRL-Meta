@@ -2,10 +2,11 @@ import datetime
 import math
 import random
 
-import gym
+import gymnasium as gym
 import numpy as np
-from gym import spaces
-from gym.utils import seeding
+import pandas as pd
+from gymnasium import spaces
+from gymnasium.utils import seeding
 from stable_baselines3.common.vec_env import DummyVecEnv
 
 from meta.env_fx_trading.util.log_render import render_to_file
@@ -56,7 +57,7 @@ class tgym(gym.Env):
     def __init__(
         self,
         df,
-        env_config_file="./config/eurusd.json",
+        env_config_file="./config/eurusd_new.json",
     ) -> None:
         assert df.ndim == 2
         super(tgym, self).__init__()
@@ -78,6 +79,7 @@ class tgym(gym.Env):
         self.df["_time"] = df[self.time_col]
         self.df["_day"] = df["weekday"]
         self.assets = df[self.asset_col].unique()
+        df[self.time_col] =  pd.to_datetime(df[self.time_col])
         self.dt_datetime = df[self.time_col].sort_values().unique()
         self.df = self.df.set_index(self.time_col)
         self.visualization = False
@@ -348,6 +350,7 @@ class tgym(gym.Env):
             np.array(obs).astype(np.float32),
             reward,
             done,
+            done,
             {"Close": self.tranaction_close_this_step},
         )
 
@@ -369,19 +372,25 @@ class tgym(gym.Env):
 
     def get_observation_vector(self, _dt, cols=None):
         cols = self.observation_list
+        # if cols contains 'datetime' replace it with _time
+        if "datetime" in cols:
+            cols[cols.index("datetime")] = "_time"
         v = []
         for a in self.assets:
+            # print(self.df[(self.df[self.asset_col] == a) & (self.df['_time'] == _dt)])
             subset = self.df.query(
-                f'{self.asset_col} == "{a}" & {self.time_col} == "{_dt}"'
+                f'{self.asset_col} == "{a}" & _time == "{_dt}"'
             )
             assert not subset.empty
+            # print(subset.loc[_dt, cols])
             v += subset.loc[_dt, cols].tolist()
         assert len(v) == len(self.assets) * len(cols)
         return v
 
-    def reset(self):
+    def reset(self, seed=None):
         # Reset the state of the environment to an initial state
-        self.seed()
+        self.seed = seed
+        # self.seed()
 
         if self.random_start:
             self.current_step = random.choice(range(int(len(self.dt_datetime) * 0.5)))
@@ -413,7 +422,8 @@ class tgym(gym.Env):
             + [0] * len(self.assets)
             + self.get_observation(self.current_step)
         )
-        return np.array(_space).astype(np.float32)
+        return np.array(_space).astype(np.float32), {'balance_info': [self.balance, self.max_draw_down_pct], 'order1': [0] * len(self.assets),
+                                                     'order2': [0] * len(self.assets), 'observation_current': self.get_observation(self.current_step)}
 
     def render(self, mode="human", title=None, **kwargs):
         # Render the environment to the screen
